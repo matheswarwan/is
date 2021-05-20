@@ -1,0 +1,49 @@
+<p>
+%%[
+
+    SET @dispatchPageURL = "https://pub.s1.exacttarget.com/lmqwhyg2hzn/bll2rygw4cy"
+
+    SET @token = QueryParameter("token")
+    SET @istokensent = QueryParameter("istokensent")
+    SET @invalidpass = QueryParameter("invalidpass")
+    SET @invalidtoken = QueryParameter("invalidtoken")
+    SET @referer = QueryParameter("referer")
+
+    IF EMPTY(@istokensent) AND EMPTY(@token) THEN
+
+    IF @invalidpass == 1 THEN
+    	OUTPUT(CONCAT("Invalid username or password"))
+    ENDIF
+
+    IF @invalidtoken == 1 THEN
+    	OUTPUT(CONCAT("Token expired or missing"))
+    ENDIF
+
+]%%
+</p>
+<form method="post" action="%%=v(@dispatchPageURL)=%%">
+    <label for="username">User name *</label>
+    <input type="text" name="username" minlength="1">
+    <br>
+    <label for="pass">Password *</label>
+    <input type="password" name="pass" minlength="1">
+    <br>
+    <input type="hidden" name="referer" value="%%=v(@referer)=%%">
+    <br>
+    <button>Send</button>
+</form>
+%%[ ELSEIF EMPTY(@istokensent) AND NOT EMPTY(@token) THEN
+
+    Redirect(concat(@dispatchPageURL,"?token=",@token,"&referer=",@referer))
+
+ELSE ]%%
+<p>Please check your email and copy-paste your token here</p>
+<form method="post" action="%%=v(@dispatchPageURL)=%%">
+    <label for="token">Secret token *</label>
+    <input type="text" name="token" minlength="1">
+    <br>
+    <input type="hidden" name="referer" value="%%=v(@referer)=%%">
+    <br>
+    <button>Log in</button>
+</form>
+%%[ ENDIF ]%%

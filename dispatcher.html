@@ -1,0 +1,93 @@
+%%[
+
+SET @loginPageURL = "https://pub.s1.exacttarget.com/lmqwhyg2hzn/4cyj0ionwct"
+
+SET @username = RequestParameter("username")
+SET @pass = RequestParameter("pass")
+SET @token = RequestParameter("token")
+SET @referer = RequestParameter("referer")
+SET @today = SystemDateToLocalDate(NOW())
+
+SET @TriggeredSendExternalKey = "83197"
+
+IF NOT EMPTY(@username) AND NOT EMPTY(@pass) AND NOT EMPTY(@referer) THEN
+
+    SET @rows = LookupRows("Users","Username",@username,"Password",@pass)
+    IF RowCount(@rows) > 0 THEN
+        SET @Id = Field(Row(@rows, 1), 'Id')
+        SET @Email = Field(Row(@rows, 1), 'Email')
+    ENDIF
+
+    IF NOT EMPTY(@Id) AND NOT EMPTY(@Email) THEN
+
+        SET @token = GUID()
+
+        UpsertDE("Tokens",1,"Id",@Id,"Token",@token,"Referer",@referer,"CreatedDate",@today)
+
+        SET @TriggeredSend = CreateObject("TriggeredSend")
+        SET @TriggeredSendDefinition = CreateObject("TriggeredSendDefinition")
+        SetObjectProperty(@TriggeredSendDefinition, "CustomerKey", @TriggeredSendExternalKey)
+        SetObjectProperty(@TriggeredSend, "TriggeredSendDefinition", @TriggeredSendDefinition)
+        
+        SET @TriggeredSendSubscriber = CreateObject("Subscriber")
+        SetObjectProperty(@TriggeredSendSubscriber, "EmailAddress", @Email)
+        SetObjectProperty(@TriggeredSendSubscriber, "SubscriberKey", @Email)
+        
+        SET @tkn = CreateObject("Attribute")
+        SetObjectProperty(@tkn, "Name", "Token")
+        SetObjectProperty(@tkn,"Value", @token)
+        AddObjectArrayItem(@TriggeredSend, "Attributes", @tkn)
+
+        SET @ref = CreateObject("Attribute")
+        SetObjectProperty(@ref, "Name", "Referer")
+        SetObjectProperty(@ref,"Value", @referer)
+        AddObjectArrayItem(@TriggeredSend, "Attributes", @ref)
+        
+        AddObjectArrayItem(@TriggeredSend, "Subscribers", @TriggeredSendSubscriber)
+        
+        SET @TriggeredSend_statusCode = InvokeCreate(@TriggeredSend, @TriggeredSend_statusMsg, @errorCode)
+        
+        IF @TriggeredSend_statusCode != "OK" THEN
+            RaiseError(@TriggeredSend_statusMsg, 0, @TriggeredSend_statusCode, @errorCode)
+        ENDIF
+        
+        Redirect(concat(@loginPageURL,"?istokensent=",1,"&referer=",@referer))
+
+    ELSE
+
+       Redirect(concat(@loginPageURL,"?invalidpass=",1,"&referer=",@referer))
+
+    ENDIF
+
+ELSEIF NOT EMPTY(@token) THEN    
+
+    SET @createdDate = Lookup("Tokens","CreatedDate","Token",@token)
+
+    IF NOT EMPTY(@createdDate) AND @today < DateAdd(@createdDate, 1, "D")  THEN
+
+        SET @endDate = DateAdd(@today, 1, "D")
+
+        ]%%
+        <script runat="server">
+            Platform.Load("core", "1.1");
+            var endDate = Platform.Variable.GetValue("@endDate");
+            var token = Platform.Variable.GetValue("@token");
+            Platform.Response.SetCookie("userlg", token, endDate, true);
+        </script>    
+        %%[
+
+        Redirect(CONCAT(@referer))
+
+    ELSE
+
+        Redirect(concat(@loginPageURL,"?invalidtoken=",1,"&referer=",@referer)) 
+
+    ENDIF
+
+ELSE   
+
+    Redirect(concat(@loginPageURL,"?invalidpass=",1,"&referer=",@referer)) 
+
+ENDIF
+
+]%%

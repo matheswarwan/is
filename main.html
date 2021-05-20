@@ -1,0 +1,30 @@
+<script runat="server">
+    Platform.Load("core", "1.1");
+    var token =  Platform.Request.GetCookieValue('userlg') 
+    Platform.Variable.SetValue("@token", token);
+</script>
+%%[ 
+
+SET @loginPageURL = "https://pub.s1.exacttarget.com/lmqwhyg2hzn/4cyj0ionwct"
+SET @currentPageURL = RequestParameter('https://pub.s1.exacttarget.com/lmqwhyg2hzn/rr4n3mhrsli')
+SET @token = @token
+SET @today = SystemDateToLocalDate(NOW())
+SET @createdDate = Lookup("Tokens","CreatedDate","Token",@token)
+
+IF EMPTY(@createdDate) OR @today > DateAdd(@createdDate, 1, "D" ) THEN 
+    Redirect(concat(@loginPageURL,"?referer=",@currentPageURL))
+ENDIF
+
+]%%
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Secured page</title>
+    </head>
+    <body>
+        <h1>Hello World</h1>
+    </body>
+</html>
