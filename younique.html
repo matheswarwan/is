@@ -1,0 +1,1533 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript">
+      "use strict";
+
+      var _createClass = (function () {
+        function defineProperties(target, props) {
+          for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
+          }
+        }
+        return function (Constructor, protoProps, staticProps) {
+          if (protoProps) defineProperties(Constructor.prototype, protoProps);
+          if (staticProps) defineProperties(Constructor, staticProps);
+          return Constructor;
+        };
+      })();
+
+      function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+          throw new TypeError("Cannot call a class as a function");
+        }
+      }
+
+      var SlideNav = (function () {
+        function SlideNav(options) {
+          _classCallCheck(this, SlideNav);
+
+          //default values
+          if (!options) var options = {};
+          this.activeClass = options.activeClass || "active";
+          this.toggleButtonSelector = options.toggleButtonSelector || false;
+          this.toggleBoxSelector = options.toggleBoxSelector || false;
+          this.speed = options.speed > 0 ? options.speed : 70;
+          this.hideAfterSelect = options.hideBoxAfterSelect || true;
+          this.changeHash = options.changeHash || false;
+          this.navBoxToggleClass = options.navBoxToggleClass || false;
+
+          //initialize
+          this.init();
+        }
+
+        _createClass(SlideNav, [
+          {
+            key: "init",
+            value: function init() {
+              //scrollDoc
+              this.scrollDoc =
+                document.scrollingElement || document.documentElement;
+
+              this.getElements();
+              this.observe();
+              this.setActiveAnchor();
+            },
+          },
+          {
+            key: "getElements",
+            value: function getElements() {
+              this.toggleButton = document.querySelector(
+                this.toggleButtonSelector
+              );
+              if (this.toggleButton) {
+                this.opened = false;
+              }
+              this.toggleBoxes = document.querySelectorAll(
+                this.toggleBoxSelector
+              );
+              this.navAnchors = document.querySelectorAll(
+                'a:not([target="_blank"])'
+              );
+            },
+          },
+          {
+            key: "observe",
+            value: function observe() {
+              var _this = this;
+
+              //blur navBox
+              window.addEventListener("click", function (e) {
+                if (
+                  _this.opened &&
+                  !_this.isClosestElement(e.target, _this.toggleButton) &&
+                  !_this.isBoxNavTarget(e.target)
+                ) {
+                  _this.hideNavBox();
+                }
+              });
+              // toggle button
+              if (this.toggleButton) {
+                this.toggleButton.addEventListener("click", function (e) {
+                  setTimeout(function () {
+                    _this.opened ? _this.hideNavBox() : _this.showNavBox();
+                  });
+                });
+              }
+
+              // anchors
+              var _iteratorNormalCompletion = true;
+              var _didIteratorError = false;
+              var _iteratorError = undefined;
+
+              try {
+                for (
+                  var _iterator = this.navAnchors[Symbol.iterator](), _step;
+                  !(_iteratorNormalCompletion = (_step = _iterator.next())
+                    .done);
+                  _iteratorNormalCompletion = true
+                ) {
+                  var anchor = _step.value;
+
+                  anchor.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    var linkHash = _this.getHash(e.currentTarget.href);
+                    if (!_this.goToSection(linkHash) && e.currentTarget.href)
+                      _this.goToUrl(e.currentTarget.href);
+                  });
+                }
+              } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                  }
+                } finally {
+                  if (_didIteratorError) {
+                    throw _iteratorError;
+                  }
+                }
+              }
+
+              // scroll
+              window.addEventListener("scroll", function () {
+                _this.setActiveAnchor();
+              });
+            },
+          },
+          {
+            key: "setActiveAnchor",
+            value: function setActiveAnchor() {
+              var _iteratorNormalCompletion2 = true;
+              var _didIteratorError2 = false;
+              var _iteratorError2 = undefined;
+
+              try {
+                for (
+                  var _iterator2 = this.navAnchors[Symbol.iterator](), _step2;
+                  !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next())
+                    .done);
+                  _iteratorNormalCompletion2 = true
+                ) {
+                  var anchor = _step2.value;
+
+                  var linkHash = this.getHash(anchor.href),
+                    section = this.getSection(linkHash),
+                    offset = this.scrollDoc.scrollTop,
+                    scrollHeight = this.scrollDoc.scrollHeight;
+
+                  if (
+                    section &&
+                    ((section.offsetTop <= offset &&
+                      section.offsetTop + section.offsetHeight > offset) ||
+                      offset + window.innerHeight == scrollHeight)
+                  ) {
+                    var _iteratorNormalCompletion3 = true;
+                    var _didIteratorError3 = false;
+                    var _iteratorError3 = undefined;
+
+                    try {
+                      for (
+                        var _iterator3 = this.navAnchors[Symbol.iterator](),
+                          _step3;
+                        !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next())
+                          .done);
+                        _iteratorNormalCompletion3 = true
+                      ) {
+                        var link = _step3.value;
+
+                        if (link.href != anchor.href)
+                          link.classList.remove("active");
+                      }
+                    } catch (err) {
+                      _didIteratorError3 = true;
+                      _iteratorError3 = err;
+                    } finally {
+                      try {
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                          _iterator3.return();
+                        }
+                      } finally {
+                        if (_didIteratorError3) {
+                          throw _iteratorError3;
+                        }
+                      }
+                    }
+
+                    anchor.classList.add("active");
+                  }
+                }
+              } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                    _iterator2.return();
+                  }
+                } finally {
+                  if (_didIteratorError2) {
+                    throw _iteratorError2;
+                  }
+                }
+              }
+            },
+          },
+          {
+            key: "goToSection",
+            value: function goToSection(linkHash) {
+              var section = this.getSection(linkHash);
+              if (section) {
+                var offsetTop = section.offsetTop;
+                this.scrollTo(offsetTop, this.speed);
+                if (this.hideAfterSelect) this.hideNavBox();
+                if (this.changeHash) {
+                  history.pushState({}, null, "#" + linkHash);
+                }
+                return true;
+              } else {
+                return false;
+              }
+            },
+          },
+          {
+            key: "scrollTo",
+            value: function scrollTo(destOffset, duration) {
+              var _this2 = this;
+
+              var diffOffset = destOffset - this.scrollDoc.scrollTop,
+                partDist = (diffOffset / duration) * 1;
+
+              if (duration <= 0) return;
+              setTimeout(function () {
+                _this2.scrollDoc.scrollTop =
+                  _this2.scrollDoc.scrollTop + partDist;
+                if (_this2.scrollDoc.scrollTop == destOffset) return;
+                _this2.scrollTo(destOffset, duration - 1);
+              }, 1);
+            },
+          },
+          {
+            key: "goToUrl",
+            value: function goToUrl(url) {
+              return (window.location = url);
+            },
+          },
+          {
+            key: "getSection",
+            value: function getSection(linkHash) {
+              if (linkHash) {
+                var id = "#" + linkHash;
+                return document.querySelector(id);
+              }
+              return false;
+            },
+          },
+          {
+            key: "getHash",
+            value: function getHash(href) {
+              return href.split("#")[1];
+            },
+          },
+          {
+            key: "isBoxNavTarget",
+            value: function isBoxNavTarget(target) {
+              var isTarget = false;
+              var _iteratorNormalCompletion4 = true;
+              var _didIteratorError4 = false;
+              var _iteratorError4 = undefined;
+
+              try {
+                for (
+                  var _iterator4 = this.toggleBoxes[Symbol.iterator](), _step4;
+                  !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next())
+                    .done);
+                  _iteratorNormalCompletion4 = true
+                ) {
+                  var box = _step4.value;
+
+                  if (this.isClosestElement(target, box)) isTarget = true;
+                }
+              } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                    _iterator4.return();
+                  }
+                } finally {
+                  if (_didIteratorError4) {
+                    throw _iteratorError4;
+                  }
+                }
+              }
+
+              return isTarget;
+            },
+          },
+          {
+            key: "isClosestElement",
+            value: function isClosestElement(target, element) {
+              while (element != target) {
+                target = target.parentNode;
+                if (!target) return false;
+              }
+              return true;
+            },
+          },
+          {
+            key: "hideNavBox",
+            value: function hideNavBox() {
+              var _iteratorNormalCompletion5 = true;
+              var _didIteratorError5 = false;
+              var _iteratorError5 = undefined;
+
+              try {
+                for (
+                  var _iterator5 = this.toggleBoxes[Symbol.iterator](), _step5;
+                  !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next())
+                    .done);
+                  _iteratorNormalCompletion5 = true
+                ) {
+                  var box = _step5.value;
+
+                  if (this.navBoxToggleClass) {
+                    box.classList.remove(this.navBoxToggleClass);
+                  } else {
+                    box.style.display = "none";
+                  }
+                }
+              } catch (err) {
+                _didIteratorError5 = true;
+                _iteratorError5 = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                    _iterator5.return();
+                  }
+                } finally {
+                  if (_didIteratorError5) {
+                    throw _iteratorError5;
+                  }
+                }
+              }
+
+              this.opened = false;
+            },
+          },
+          {
+            key: "showNavBox",
+            value: function showNavBox() {
+              var _iteratorNormalCompletion6 = true;
+              var _didIteratorError6 = false;
+              var _iteratorError6 = undefined;
+
+              try {
+                for (
+                  var _iterator6 = this.toggleBoxes[Symbol.iterator](), _step6;
+                  !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next())
+                    .done);
+                  _iteratorNormalCompletion6 = true
+                ) {
+                  var box = _step6.value;
+
+                  if (this.navBoxToggleClass) {
+                    box.classList.add(this.navBoxToggleClass);
+                  } else {
+                    box.style.display = "block";
+                  }
+                }
+              } catch (err) {
+                _didIteratorError6 = true;
+                _iteratorError6 = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                    _iterator6.return();
+                  }
+                } finally {
+                  if (_didIteratorError6) {
+                    throw _iteratorError6;
+                  }
+                }
+              }
+
+              this.opened = true;
+            },
+          },
+        ]);
+
+        return SlideNav;
+      })();
+    </script>
+    <script>
+      var dictionary, set_lang;
+      // Object literal behaving as multi-dictionary
+      dictionary = {
+        english: {
+          _Page1_link: "Presenter Guide",          
+          _Page2_link: "Share with 5",
+          _Page3_link: "Product Training",
+          _Page4_link: "Social Sharing for Success",
+          _Contact_link: "Contact",
+          _Bookmark_link: "Bookmark This Page",
+          _Page1_header:
+            "THIS IS THE RIGHT TIME AND YOU ARE IN THE RIGHT PLACE. LET'S GET STARTED",
+          _Page1_title: "MAKE A LIST OF 5",
+          _Page1_text1:
+            "Start today by making a list of 5 people you know would love to try Younique products, and then share your personal website link with them!",
+          _Page1_text2: "Starting your business is that easy!",
+          _Page1_button: "HOW TO SHARE",
+          _Page2_title1: "NO PRODUCT YET?",
+          _Page2_title2: "NO PROBLEM!",
+          _Page2_text1:
+            "Share how excited you are that your favorite products are on the way or share the YOUNIQUE eye essentials — designed exclusively for friends and family to try Younique! It features fan favorites like our MOODSTRUCK EPIC 4D one-step fiber mascara.",
+          _Page2_text2:
+            "It is never too soon to start sharing your excitement!",
+          _Page2_button: "SHARE NOW",
+          _Page3_title1: "CONNECT WITH YOUR YOUNIQUE SPONSOR",
+          _Page3_text1:
+            "Your Sponsor will be one of your best sources to get you started! Reach out now to get their top tips and tricks for sharing Younique. Make sure to",
+          _Page3_text2: "join our Presenter Facebook group",
+          _Page3_text3:
+            "as well to connect with your Younique family, ask questions, and share your successes!",
+          _Page4_title: "SHARE WITH 5, GET PAID IN 3",
+          _Page4_text1:
+            "Just 3 hours after making a sale on your personal website, your earnings from that sale are deposited into your very own PayQuicker account. Plus, when you hit your first 250 Personal Retail Sales (PRS) you will start earning Y-CASH!",
+          _Page4_text2:
+            "Let the excitement build... and build your business! The quicker you get start- ed, the closer your goals will be.",
+          _Page4_button: "TRAINING TOOLS",
+        },
+        french: {
+          _Page1_link: "Guide du présentateur",
+          _Page2_link: "Partager avec 5",
+          _Page3_link: "Essai de production",
+          _Page4_link: "Partage social pour réussir",
+          _Contact_link: "Contacter",
+          _Bookmark_link: "Marquer cette page",
+          _Page1_header:
+            "C'EST LE BON MOMENT ET VOUS ÊTES AU BON ENDROIT. COMMENÇONS",
+          _Page1_title: "FAIRE UNE LISTE DE 5",
+          _Page1_text1:
+            "Commencez dès aujourd'hui en dressant une liste de 5 personnes dont vous savez qu'elles aimeraient essayer les produits Younique, puis partagez votre lien de site Web personnel avec elles!",
+          _Page1_text2: "Démarrer votre entreprise est aussi simple que cela!",
+          _Page1_button: "COMMENT PARTAGER",
+          _Page2_title1: "PAS ENCORE DE PRODUIT?",
+          _Page2_title2: "AUCUN PROBLÈME!",
+          _Page2_text1:
+            "Partagez votre enthousiasme à l'idée que vos produits préférés soient en route ou partagez les essentiels pour les yeux YOUNIQUE - conçus exclusivement pour que vos amis et votre famille puissent essayer Younique! Il présente les favoris des fans comme notre mascara fibre en une étape MOODSTRUCK EPIC 4D.",
+          _Page2_text2:
+            "Il n'est jamais trop tôt pour partager votre enthousiasme!",
+          _Page2_button: "PARTAGE MAINTENANT",
+          _Page3_title1: "CONNECTEZ-VOUS AVEC VOTRE SPONSOR YOUNIQUE",
+          _Page3_text1:
+            "Votre parrain sera l'une de vos meilleures sources pour vous aider à démarrer! Contactez-nous maintenant pour obtenir leurs meilleurs conseils et astuces pour partager Younique. Assurez-vous de",
+          _Page3_text2: "rejoignez notre groupe Facebook Presenter",
+          _Page3_text3:
+            "aussi pour entrer en contact avec votre famille Younique, poser des questions et partager vos réussites!",
+          _Page4_title: "PARTAGER AVEC 5, ÊTRE PAYÉ EN 3",
+          _Page4_text1:
+            "À peine 3 heures après avoir effectué une vente sur votre site Web personnel, vos revenus de cette vente sont déposés sur votre propre compte PayQuicker. De plus, lorsque vous atteignez vos 250 premières ventes personnelles au détail (PRS), vous commencez à gagner du Y-CASH!",
+          _Page4_text2:
+            "Laissez l'excitation monter ... et développez votre entreprise! Plus vite vous commencerez, plus vos objectifs seront proches.",
+          _Page4_button: "OUTILS DE FORMATION",
+        },
+      };
+      function shareImage(elem, socialMedia) {
+        let theImg = $(elem)
+          .parent()
+          .parent()
+          .parent()
+          .find("div.card-body>img");
+        let pictureUrl = theImg.attr("src");
+        let description = theImg.attr("alt");
+        let currentWebUrl = location.href;
+        if (socialMedia === "Facebook") {
+          window.open(
+            "http://www.facebook.com/sharer.php?u=" +
+              encodeURIComponent(pictureUrl) +
+              "&t=" +
+              encodeURIComponent(description),
+            "sharer",
+            "toolbar=0,status=0,width=626,height=436"
+          );
+        } else if (socialMedia === "Twitter") {
+          window.open(
+            "http://twitter.com/home?status=Currentlyreading " +
+              encodeURIComponent(pictureUrl),
+            "sharer",
+            "toolbar=0,status=0,width=626,height=436"
+          );
+        } else if (socialMedia === "LinkedIn") {
+          window.open(
+            "http://www.linkedin.com/shareArticle?mini=true&url=" +
+              encodeURIComponent(pictureUrl) +
+              "&title=" +
+              encodeURIComponent(description) +
+              "&source=" +
+              encodeURIComponent(currentWebUrl),
+            "sharer",
+            "toolbar=0,status=0,width=626,height=436"
+          );
+        } else if (socialMedia === "Pinterest") {
+          window.open(
+            "http://www.pinterest.com/pin/create/button/?url=" +
+              encodeURIComponent(currentWebUrl) +
+              "&media=" +
+              encodeURIComponent(pictureUrl) +
+              "&description=" +
+              encodeURIComponent(description),
+            "sharer",
+            "toolbar=0,status=0,width=626,height=436"
+          );
+        }
+        return false;
+      }
+      function selectCountry() {
+        var x, i, j, l, ll, selElmnt, a, b, c;
+        /* Look for any elements with the class "custom-select": */
+        x = document.getElementsByClassName("custom-select");
+        l = x.length;
+        for (i = 0; i < l; i++) {
+          selElmnt = x[i].getElementsByTagName("select")[0];
+          ll = selElmnt.length;
+          /* For each element, create a new DIV that will act as the selected item: */
+          a = document.createElement("DIV");
+          a.setAttribute("class", "select-selected");
+          a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
+          x[i].appendChild(a);
+          /* For each element, create a new DIV that will contain the option list: */
+          b = document.createElement("DIV");
+          b.setAttribute("class", "select-items select-hide");
+          for (j = 1; j < ll; j++) {
+            /* For each option in the original select element,
+              create a new DIV that will act as an option item: */
+            c = document.createElement("DIV");
+            c.innerHTML = selElmnt.options[j].innerHTML;
+            c.addEventListener("click", function (e) {
+              /* When an item is clicked, update the original select box,
+                  and the selected item: */
+              var y, i, k, s, h, sl, yl;
+              s = this.parentNode.parentNode.getElementsByTagName("select")[0];
+              sl = s.length;
+              h = this.parentNode.previousSibling;
+              for (i = 0; i < sl; i++) {
+                if (s.options[i].innerHTML == this.innerHTML) {
+                  let selLang = s.options[i].value;
+                  console.log(selLang);
+                  if (dictionary.hasOwnProperty(selLang)) {
+                    set_lang(dictionary[selLang]);
+                  }
+                  s.selectedIndex = i;
+                  h.innerHTML = this.innerHTML;
+                  y = this.parentNode.getElementsByClassName(
+                    "same-as-selected"
+                  );
+                  yl = y.length;
+                  for (k = 0; k < yl; k++) {
+                    y[k].removeAttribute("class");
+                  }
+                  this.setAttribute("class", "same-as-selected");
+                  break;
+                }
+              }
+              h.click();
+            });
+            b.appendChild(c);
+          }
+          x[i].appendChild(b);
+          a.addEventListener("click", function (e) {
+            /* When the select box is clicked, close any other select boxes,
+              and open/close the current select box: */
+            e.stopPropagation();
+            closeAllSelect(this);
+            this.nextSibling.classList.toggle("select-hide");
+            this.classList.toggle("select-arrow-active");
+          });
+        }
+        /* If the user clicks anywhere outside the select box,
+          then close all select boxes: */
+        document.addEventListener("click", closeAllSelect);
+      }
+      function closeAllSelect(elmnt) {
+        /* A function that will close all select boxes in the document,
+          except the current select box: */
+        var x,
+          y,
+          i,
+          xl,
+          yl,
+          arrNo = [];
+        x = document.getElementsByClassName("select-items");
+        y = document.getElementsByClassName("select-selected");
+        xl = x.length;
+        yl = y.length;
+        for (i = 0; i < yl; i++) {
+          if (elmnt == y[i]) {
+            arrNo.push(i);
+          } else {
+            y[i].classList.remove("select-arrow-active");
+          }
+        }
+        for (i = 0; i < xl; i++) {
+          if (arrNo.indexOf(i)) {
+            x[i].classList.add("select-hide");
+          }
+        }
+      }
+
+      $(document).ready(function () {
+        // This method bookmarks in IE, FF, Netscape. Chrome, Opera and safari do not support it!
+        $("#bookmarkme").click(function (e) {
+          var bookmarkTitle = document.title;
+          var bookmarkUrl = window.location.href;
+
+          if ("addToHomescreen" in window && addToHomescreen.isCompatible) {
+            // Mobile browsers
+            addToHomescreen({ autostart: false, startDelay: 0 }).show(true);
+          } else if (/CriOS\//.test(navigator.userAgent)) {
+            // Chrome for iOS
+            alert(
+              'To add to Home Screen, launch this website in Safari, then tap the Share button and select "Add to Home Screen".'
+            );
+          } else if (window.sidebar && window.sidebar.addPanel) {
+            // Firefox <=22
+            window.sidebar.addPanel(bookmarkTitle, bookmarkUrl, "");
+          } else if (
+            (window.sidebar &&
+              /Firefox/i.test(navigator.userAgent) &&
+              !Object.fromEntries) ||
+            (window.opera && window.print)
+          ) {
+            // Firefox 23-62 and Opera <=14
+            $(this)
+              .attr({
+                href: bookmarkUrl,
+                title: bookmarkTitle,
+                rel: "sidebar",
+              })
+              .off(e);
+            return true;
+          } else if (window.external && "AddFavorite" in window.external) {
+            // IE Favorites
+            window.external.AddFavorite(bookmarkUrl, bookmarkTitle);
+          } else {
+            // Other browsers (Chrome, Safari, Firefox 63+, Opera 15+)
+            alert(
+              "Press " +
+                (/Mac/i.test(navigator.platform) ? "Cmd" : "Ctrl") +
+                "+D to bookmark this page."
+            );
+          }
+
+          return false;
+        });
+
+        $(".navicon-container").click(function () {
+          if ($(this).hasClass("change")) {
+            $(".side-slide").animate({ left: "-570px" }, 200);
+            $(".menu-overlay").fadeOut(500);
+            $(this).removeClass("change");
+          } else {
+            $(".side-slide").animate({ left: "0px" }, 200);
+            $(".menu-overlay").fadeIn(500);
+            $(this).addClass("change");
+          }
+        });
+
+        $(".menu-overlay, nav.side-slide a").click(function (event) {
+          $(".side-slide").animate({ left: "-570px" }, 200);
+          $(".menu-overlay").fadeOut(500);
+          if ($(".navicon-container").hasClass("change")) {
+            $(".navicon-container").removeClass("change");
+          }
+        });
+
+        selectCountry();
+
+        // Function for swapping dictionaries
+        set_lang = function (dictionary) {
+          console.log("Called with " + dictionary);
+          $("[data-translate]").text(function () {
+            var key = $(this).data("translate");
+            if (dictionary.hasOwnProperty(key)) {
+              return dictionary[key];
+            }
+          });
+        };
+
+        // Set initial language to English
+        set_lang(dictionary.english);
+
+        window.slide = new SlideNav({
+          changeHash: true,
+        });
+      });
+    </script>
+
+    <style>
+      body {
+        background: #fff;
+        -webkit-font-smoothing: antialiased;
+        font-family: "Source Sans Pro", sans-serif;
+        color: #63666a;
+        letter-spacing: 0.02em;
+        font-weight: 400;
+        font-size: 1rem;
+        line-height: 1.5;
+        text-align: left;
+        margin: 0;
+      }
+      header {
+        top: 0;
+        position: sticky;
+        z-index: 100;
+        border-bottom: 2px solid #a50778;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+      }
+      @media (min-width: 576px) {
+        .header_container {
+          width: 540px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      @media (min-width: 768px) {
+        .header_container {
+          width: 720px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      @media (min-width: 992px) {
+        .header_container {
+          width: 960px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      @media (min-width: 1200px) {
+        .header_container {
+          width: 1210px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      .header_container {
+        background-color: #fff;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-left: -20px;
+        margin-right: -20px;
+        position: relative;
+      }
+      .header_section {
+        display: table-cell;
+        padding: 15px 20px;
+        vertical-align: top;
+        width: 33%;
+      }
+      .menu-header {
+        text-align: left;
+        padding: 0 5px;
+        line-height: 30px;
+        text-decoration: none;
+        color: #0e0e0f;
+        font-weight: 700;
+        font-size: 81.25%;
+        text-transform: uppercase;
+        background-color: #ccc;
+      }
+      /* Styles for Menu Navigation Side Bar */
+      .menu-overlay {
+        display: none;
+        background-color: #000;
+        bottom: 0;
+        left: 0;
+        opacity: 0.3;
+        filter: alpha(opacity=30);
+        /* IE7 & 8 */
+        position: fixed;
+        right: 0;
+        top: 0;
+        z-index: 120;
+      }
+      nav.side-slide {
+        background-color: #fff;
+        top: 0;
+        left: -570px;
+        height: 100%;
+        position: fixed;
+        /*width: 570px;*/
+        width: calc(((100vw - 1175px) / 2) + 440px);
+        z-index: 150;
+      }
+      nav.side-slide .slide-container {
+        position: relative;
+        height: 100%;
+        width: 440px;
+        padding-left: calc((100vw - 1175px) / 2);
+        box-sizing: content-box;
+        background: #f5f5f5;
+        overflow: auto;
+        pointer-events: all;
+        padding-top: 120px;
+      }
+      nav.side-slide .slide-menu-wrapper {
+        position: relative;
+        padding: 25px 65px 40px 96px;
+      }
+      nav.side-slide ul {
+        margin-top: 70px;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      nav.side-slide li {
+        text-align: left;
+        padding: 0 5px;
+        line-height: 25px;
+        text-decoration: none;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        min-width: 320px;
+        font-family: "Source Sans Pro", sans-serif;
+        color: #63666a;
+        letter-spacing: 0.02em;
+        font-weight: 400;
+      }
+      nav.side-slide li:hover {
+        transition: color 0.2s linear;
+      }
+      nav.side-slide li:hover a {
+        color: #a50778;
+      }
+      nav.side-slide a {
+        color: #63666a;
+        font-weight: 400;
+        font-size: 81.25%;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+      }
+      /* Styles for Menu Bar Icon */
+      .navicon-container {
+        display: inline-block;
+        cursor: pointer;
+        padding-left: 10px;
+        z-index: 200px;
+      }
+      .naviconbar1,
+      .naviconbar2,
+      .naviconbar3 {
+        width: 30px;
+        height: 3px;
+        background-color: #a50778;
+        margin: 7px 0;
+        transition: 0.3s;
+      }
+      .navicon-container:hover .naviconbar1,
+      .navicon-container:hover .naviconbar2,
+      .navicon-container:hover .naviconbar3 {
+        background-color: #50004d;
+      }
+      .change .naviconbar1 {
+        -webkit-transform: rotate(-45deg) translate(-5px, 8px);
+        transform: rotate(-45deg) translate(-5px, 8px);
+      }
+      .change .naviconbar2 {
+        opacity: 0;
+      }
+      .change .naviconbar3 {
+        -webkit-transform: rotate(45deg) translate(-8px, -8px);
+        transform: rotate(45deg) translate(-6px, -8px);
+      }
+      /* Styles for Footer Section */
+      footer {
+        background-color: #660053;
+        padding: 0;
+        margin: 0;
+      }
+      .footer_container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        /*border-top: 1px solid #e1e1e1;*/
+        background-color: #50004d;
+        padding: 1.5rem !important;
+        /*margin-left: -20px;
+              margin-right: -20px;
+              margin-top: 10px;*/
+      }
+      .footer_column {
+        margin: 10px;
+        min-width: 20%;
+        color: #fff;
+        font-family: proxima-nova, Helvetica, Arial, sans-serif;
+        padding: 2em 1em;
+        text-transform: uppercase;
+      }
+      .footer_header {
+        font-weight: 700;
+        font-size: 100%;
+        padding-bottom: 1em;
+        text-transform: uppercase;
+      }
+      .footer_content {
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: normal;
+        padding-bottom: 0.5em;
+        letter-spacing: 0.1rem;
+      }
+      .footer_content a {
+        color: #fff;
+        text-decoration: none;
+      }
+      .footer_content a:hover {
+        cursor: pointer;
+        color: #ddd;
+      }
+      /* Style to arrange Header, Main and Footer Section */
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+      }
+      article {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      main {
+        flex-grow: 1;
+      }
+      header,
+      main,
+      footer {
+        flex-shrink: 0;
+      }
+      /* The container must be positioned relative: */
+      .custom-select {
+        position: relative;
+        font-family: Arial;
+      }
+      .custom-select select {
+        display: none; /*hide original SELECT element: */
+      }
+      .select-selected {
+        background-color: #a50778;
+      }
+      /* Style the arrow inside the select element: */
+      .select-selected:after {
+        position: absolute;
+        content: "";
+        top: 14px;
+        right: 10px;
+        width: 0;
+        height: 0;
+        border: 6px solid transparent;
+        border-color: #fff transparent transparent transparent;
+      }
+      /* Point the arrow upwards when the select box is open (active): */
+      .select-selected.select-arrow-active:after {
+        border-color: transparent transparent #fff transparent;
+        top: 7px;
+      }
+      /* style the items (options), including the selected item: */
+      .select-items div,
+      .select-selected {
+        color: #ffffff;
+        padding: 4px 8px;
+        border: 1px solid transparent;
+        border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      /* Style items (options): */
+      .select-items {
+        position: absolute;
+        background-color: #a50778;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 99;
+      }
+      /* Hide the items when the select box is closed: */
+      .select-hide {
+        display: none;
+      }
+      .select-items div:hover,
+      .same-as-selected {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+      /* Sections as pages and content styling */
+      .section {
+        min-height: 110vh;
+        position: relative;
+        text-align: center;
+        font-family: sans-serif, arial;
+        margin: 0;
+      }
+      .text-wr {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+      }
+      #introduction {
+        background-color: #660053;
+        padding: 0;
+        margin: 0;
+      }
+      #section1 {
+        background: #ffffff;
+        color: #0e0e0f;
+      }
+      #section2 {
+        background: #95bcba;
+        color: #ffffff;
+      }
+      #section3 {
+        background: #ffffff;
+        color: #0e0e0f;
+      }
+      #section4 {
+        background: #95bcba;
+        color: #ffffff;
+      }
+      @media (min-width: 576px) {
+        .main-content {
+          width: 540px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      @media (min-width: 768px) {
+        .main-content {
+          width: 720px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      @media (min-width: 992px) {
+        .main-content {
+          width: 960px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      @media (min-width: 1200px) {
+        .main-content {
+          width: 1210px;
+          max-width: 100%;
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 10px 15px;
+      }
+      .main-title {
+        font-size: 45px;
+        line-height: 55px;
+        font-family: "Proxima Nova", Arial, sans-serif;
+        color: #95bcba;
+        padding: 30px;
+        font-weight: 900;
+        margin: 15px 0 5px 0;
+      }
+      .main-sub-title {
+        font-size: 35px;
+        line-height: 45px;
+        font-family: "Proxima Nova", Arial, sans-serif;
+        color: #3d003d;
+        padding: 30px;
+        font-weight: 900;
+      }
+      .main-text {
+        font-size: 25px;
+        line-height: 35px;
+        font-family: "Proxima Nova", Arial, sans-serif;
+        color: #0e0e0f;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        font-weight: 500;
+      }
+      .hero-number {
+        width: 40%;
+        text-align: center;
+        border-top: 2px solid #95bcba;
+        line-height: 0rem;
+        margin: 10px 0 20px;
+      }
+      .hero-number span {
+        padding: 0 15px;
+        padding-top: 5px;
+        background: #ffffff;
+      }
+      .hero-number .number-container {
+        background: #95bcba;
+        border-radius: 50%;
+        font-family: "Proxima Nova", Arial, sans-serif;
+        color: #fff;
+        font-size: 3rem;
+        font-weight: 700;
+        min-width: 50px;
+        min-height: 50px;
+        padding: 12px 25px;
+      }
+      .button-container {
+        margin: 30px 0 10px 0;
+      }
+      .page-button {
+        text-decoration: none;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        padding: 10px 35px;
+        background-color: #95bcba;
+        border-radius: 2px;
+      }
+      .grid {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+      }
+      .column {
+        width: 50%;
+        margin: 5px 10px;
+        min-height: 300px;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+  %%[
+    set @User_ID = _subscriberkey
+    set @EmailAddress = emailaddr
+    ]%%
+    <script type="javascript" runat="server">
+      Platform.Load("core","1");
+      try {
+        var ip = Platform.Request.ClientIP();
+        var w1de = DataExtension.Init("Week1_cloudpage");
+        w1de.Rows.Add(
+          {
+            EmailAddress:Variable.GetValue("@EmailAddress"),
+            User_ID:Variable.GetValue("@User_ID"),
+            IPAddress:ip
+          }
+        );
+      }
+      catch(e) {
+        Write(e);
+      }
+    </script>
+    <article>
+      <!-- Below section reflects the header content -->
+      <header>
+        <div class="header_container">
+          <!-- Section for Menu Icon (three lines) -->
+          <div class="header_section" style="z-index: 200">
+            <div class="navicon-container">
+              <div class="naviconbar1"></div>
+              <div class="naviconbar2"></div>
+              <div class="naviconbar3"></div>
+            </div>
+          </div>
+          <div class="header_section" style="text-align: center">
+            <img src="https://image.email.youniqueproducts.com/lib/fe2b117171640475771d77/m/1/logo_cp_png.png" width="220" />
+          </div>
+          <!-- Greeting section -->
+          <div class="header_section" style="vertical-align: middle">
+            <div class="custom-select" style="width: 150px; float: right">
+              <select id="lang" onchange="alert('changed')">
+                <option value="0">Language</option>
+                <option value="english" selected>English</option>
+                <option value="french">French</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- List of menu items -->
+        <nav class="side-slide">
+          <div class="slide-container">
+            <div class="slide-menu-wrapper">
+              <ul>
+                <li>
+                  <a href="#section1" data-translate="_Page1_link"
+                    >Presenter Guide</a
+                  >
+                </li>
+                <li>
+                  <a href="#section2" data-translate="_Page2_link"
+                    >Share with 5</a
+                  >
+                </li>
+                <li>
+                  <a href="#section3" data-translate="_Page3_link"
+                    >Product Training</a
+                  >
+                </li>
+                <li>
+                  <a href="#section4" data-translate="_Page4_link"
+                    >Social Sharing for Success</a
+                  >
+                </li>
+                <br><br><br>
+                <li>
+                  <a href="#Contact" data-translate="_Contact_link">Contact</a>
+                </li>
+                <li>
+                  <a href="#" id="bookmarkme" data-translate="_Bookmark_link"
+                    >Bookmark This Page</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <!-- On clicking menu icon, this overlay section appears to gray out the body -->
+        <div class="menu-overlay">&nbsp;</div>
+      </header>
+      <main>
+        <div id="introduction" class="section">
+          <div class="text-wr">
+            <div style="height: auto; min-width: 100vw">
+              <img
+                src="https://image.email.youniqueproducts.com/lib/fe2b117171640475771d77/m/1/YouniqueWelcome.png"
+                style="
+                  margin-left: auto;
+                  margin-right: auto;
+                  display: block;
+                  width: 80%;
+                "
+              />
+            </div>
+          </div>
+        </div>
+        <div id="section1" class="section">
+          <div class="text-wr">
+            <div class="main-content">
+              <div class="main-sub-title" data-translate="_Page1_header">
+                THIS IS THE RIGHT TIME AND YOU ARE IN THE RIGHT PLACE. LET'S GET
+                STARTED
+              </div>
+              <br clear="all" /><br clear="all" />
+              <div class="main-title" data-translate="_Page1_title">
+                MAKE A LIST OF 5
+              </div>
+              <div class="hero-number">
+                <!--<span><span class="number-container">1</span></span> -->
+              </div>
+              <div class="main-text" data-translate="_Page1_text1">
+                Start today by making a list of 5 people you know would love to
+                try Younique products, and then share your personal website link
+                with them!
+              </div>
+              <div class="main-text" data-translate="_Page1_text2">
+                Starting your business is that easy!
+              </div>
+              <!--<div class="button-container">
+                <a href="#" class="page-button" data-translate="_Page1_button"
+                  >HOW TO SHARE</a
+                >
+              </div>-->
+              <div style="height: 50px">&nbsp;</div>
+              <br clear="all" />
+            </div>
+          </div>
+        </div>
+        <div id="section2" class="section">
+          <div class="text-wr">
+            <div class="main-content">
+              <div class="grid">
+                <div class="column">
+                  <div
+                    class="main-title"
+                    style="margin: 0; padding: 0; color: #fff"
+                    data-translate="_Page2_title1"
+                  >
+                    NO PRODUCT YET?
+                  </div>
+                  <br clear="all" />
+                  <div
+                    class="hero-number"
+                    style="width: 90%; border-top: 2px solid #ffffff"
+                  >
+                    <!--<span style="background: #95bcba">
+                      <span
+                        class="number-container"
+                        style="background: #ffffff; color: #95bcba"
+                        >2</span
+                      >
+                    </span>-->
+                  </div>
+                  <br clear="all" />
+                
+                  <div
+                    class="main-title"
+                    style="margin: 0; padding: 0; color: #fff"
+                    data-translate="_Page2_title2"
+                  >
+                    NO PROBLEM!
+                  </div>
+                </div>
+                <div class="column">
+                  <img
+                    src="https://image.email.youniqueproducts.com/lib/fe2b117171640475771d77/m/1/Page2_image.png"
+                    style="
+                      margin-left: auto;
+                      margin-right: auto;
+                      display: block;
+                      width: 95%;
+                      max-width: 450px;
+                    "
+                  />
+                </div>
+              </div>
+              <div style="height: 20px">&nbsp;</div>
+              <div
+                class="main-text"
+                style="color: #ffffff"
+                data-translate="_Page2_text1"
+              >
+                Share how excited you are that your favorite products are on the
+                way or share the YOUNIQUE eye essentials — designed exclusively
+                for friends and family to try Younique! It features fan
+                favorites like our MOODSTRUCK EPIC 4D one-step fiber mascara.
+              </div>
+              <div
+                class="main-text"
+                style="color: #ffffff"
+                data-translate="_Page2_text2"
+              >
+                Starting your business is that easy!
+              </div>
+              <!--<div class="button-container">
+                <a
+                  href="#"
+                  class="page-button"
+                  style="border: 4px solid #ffffff"
+                  data-translate="_Page2_button"
+                  >SHARE NOW</a
+                >
+              </div>-->
+              <div style="height: 10px">&nbsp;</div>
+              <br clear="all" />
+            </div>
+          </div>
+        </div>
+        <div id="section3" class="section">
+          <div class="text-wr">
+            <div class="main-content">
+              <div class="grid">
+                <div class="column">
+                  <img
+                    src="https://image.email.youniqueproducts.com/lib/fe2b117171640475771d77/m/1/Page3_image.png"
+                    style="
+                      margin-left: auto;
+                      margin-right: auto;
+                      display: block;
+                      width: 95%;
+                      max-width: 450px;
+                    "
+                  />
+                </div>
+                <div class="column">
+                <div
+                    class="main-title"
+                    style="margin: 0; padding: 0; max-width: 350px"
+                    data-translate="_Page3_title1"
+                  >
+                    CONNECT WITH YOUR YOUNIQUE SPONSOR
+                  </div>
+                  <br clear="all" />
+                  <div class="hero-number" style="width: 80%">
+                    <!--<span>
+                      <span class="number-container">3</span>
+                    </span>-->
+                  </div>
+                  <br clear="all" />
+                  
+                </div>
+              </div>
+              <div style="height: 30px">&nbsp;</div>
+              <div class="main-text">
+                <span data-translate="_Page3_text1"
+                  >Your Sponsor will be one of your best sources to get you
+                  started! Reach out now to get their top tips and tricks for
+                  sharing Younique. Make sure to</span
+                >
+                <span
+                  data-translate="_Page3_text2"
+                  style="color: #c5604e; font-weight: bold"
+                  >join our Presenter Facebook group</span
+                >
+                <span data-translate="_Page3_text3"
+                  >as well to connect with your Younique family, ask questions,
+                  and share your successes!</span
+                >
+              </div>
+              <div style="height: 20px">&nbsp;</div>
+              <br clear="all" />
+            </div>
+          </div>
+        </div>
+        <div id="section4" class="section" style="height: calc(100vh + 250px)">
+          <div style="height: 40px">&nbsp;</div>
+          <div class="text-wr">
+            <div class="main-content">
+              <div
+                class="main-title"
+                style="margin: 0; padding: 0; color: #fff"
+                data-translate="_Page4_title"
+              >
+                SHARE WITH 5, GET PAID IN 3
+              </div>
+              <br clear="all" />
+              <div class="hero-number" style="border-top: 2px solid #ffffff">
+                <!--<span style="background: #95bcba">
+                  <span
+                    class="number-container"
+                    style="background: #ffffff; color: #95bcba"
+                    >4</span
+                  >
+                </span>-->
+              </div>
+              <br clear="all" />
+              <div style="margin-top: 20px">
+                <img
+                  src="https://image.email.youniqueproducts.com/lib/fe2b117171640475771d77/m/1/Page4_image.png"
+                  style="
+                    margin-left: auto;
+                    margin-right: auto;
+                    display: block;
+                    width: 95%;
+                  "
+                />
+              </div>
+              <div style="height: 20px">&nbsp;</div>
+              <div
+                class="main-text"
+                style="color: #ffffff"
+                data-translate="_Page4_text1"
+              >
+                Just 3 hours after making a sale on your personal website, your
+                earnings from that sale are deposited into your very own
+                PayQuicker account. Plus, when you hit your first 250 Personal
+                Retail Sales (PRS) you will start earning Y-CASH!
+              </div>
+              <div
+                class="main-text"
+                style="color: #ffffff"
+                data-translate="_Page4_text2"
+              >
+                Let the excitement build... and build your business! The quicker
+                you get start- ed, the closer your goals will be.
+              </div>
+              <!--<div class="button-container">
+                <a
+                  href="#"
+                  class="page-button"
+                  style="border: 4px solid #ffffff"
+                  data-translate="_Page4_button"
+                  >TRAINING TOOLS</a
+                >
+              </div> -->
+              <br clear="all" />
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer Section -->
+      <footer>
+        <div class="footer_container" id="contact">
+          <div class="footer_column">
+            <div class="footer_header">PRIVACY CENTER</div>
+            <div class="footer_content"><a href="#">PRIVACY POLICY</a></div>
+            <div class="footer_content">TERMS & CONDITIONS</div>
+          </div>
+          <div class="footer_column">Help Center</div>
+        </div>
+      </footer>
+    </article>
+  </body>
+</html>
