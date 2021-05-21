@@ -8,7 +8,8 @@ SET @token = RequestParameter("token")
 SET @referer = RequestParameter("referer")
 SET @today = SystemDateToLocalDate(NOW())
 
-SET @TriggeredSendExternalKey = "83197"
+SET @TriggeredSendExternalKey = "PS-GS-TSD1"
+SET @TriggeredSendExternalKey_1 = "83197"
 
 IF NOT EMPTY(@username) AND NOT EMPTY(@pass) AND NOT EMPTY(@referer) THEN
 
