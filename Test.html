@@ -45,7 +45,24 @@
                       var promoStatus = this.promoStatus;
                       if(promoStatus) {
                         alert("Unsubscribing from Promotional Emails...");
-                        alert(getAccessToken())
+                        axios.post(this.apiUrl, {'action':'unsubscribeNewsLetter',
+                                 'subscriberKey' : 'mathes_3.kanagarajan@cloudkettle.com',
+                                 'email' : 'mathes3.kanagarajan@cloudkettle.com',
+                                 'listName' : 'Product and promotional emails',
+                                 'listAction': 'Unsubscribe'
+                                      }
+                                )
+                            .then(result => {
+                              if (result.data.status == 'OK') {
+                                alert(Stringify(result));
+                              } else {
+                                alert(Stringify(result));
+                              }
+                            })
+                        },
+                              
+                              
+                              
                       }else{
                         alert("Subscribing to Promotional emails");
                       }
