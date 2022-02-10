@@ -1,0 +1,56 @@
+        <div class="header-box-blue">Subscription Preferences</div>
+        <div id="app" v-cloak> 
+            <h1 class="text-xl font-semibold"> Your Information</h1>
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="emailAddress">Email</label>
+            <input style="float: left;" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @keyup.enter="updateEmailAddress(emailAddress)" v-model="emailAddress" id="emailAddress" name="emailAddress" v-bind:readonly="isEmailReadOnly" />
+            <img src="../pencilIcon.jpg" @click="toggleEmailAddressInput(isEmailReadOnly)"/>
+            <h2 class="text-xl font-semibold">Subscription Settings</h2><br><br>
+            <label class="switch">
+                <input type="checkbox" v-model="promoStatus" @change="PromoStatusChange">
+                <span class="slider round"></span>
+              </label>
+            <div style="padding-left: 10px;" class="appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"  id="promo" name="promo">Product and Promotional emails</div>
+
+<br><br><br><br>
+          
+          <script src="https://unpkg.com/vue@next"></script>
+        <script>
+            let app = Vue.createApp({
+                data: function() {
+                  //alert("loading data...")
+
+                    return {
+                        emailAddress: "mathes.kanagarajan@cloudKettle.com",
+                        isEmailReadOnly: true,
+                        promoStatus: false,
+
+
+                        message: "Message content",
+                        greeting: "Hello",
+                        isVisible: false,
+                        isVisible2: true,
+                        isVisible3: true
+                    }
+                },
+                methods: {
+                    toggleEmailAddressInput(isEmailReadOnly) { 
+                        this.isEmailReadOnly= !this.isEmailReadOnly;
+                        alert("Email Address field read only property value = " + isEmailReadOnly);
+                    },
+                    updateEmailAddress(emailAddress) {
+                      this.isEmailReadOnly = true;
+                        alert("New Email address==> " + emailAddress);
+                    },
+                    PromoStatusChange() {
+                      var promoStatus = this.promoStatus;
+                      if(promoStatus) {
+                        alert("Unsubscribing from Promotional Emails...");
+                        alert(getAccessToken())
+                      }else{
+                        alert("Subscribing to Promotional emails");
+                      }
+                    }
+                }
+            })
+            app.mount('#app')
+            </script>
